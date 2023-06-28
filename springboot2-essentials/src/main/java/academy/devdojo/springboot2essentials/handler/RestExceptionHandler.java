@@ -2,14 +2,19 @@ package academy.devdojo.springboot2essentials.handler;
 
 import academy.devdojo.springboot2essentials.exception.BadRequestException;
 import academy.devdojo.springboot2essentials.exception.BadRequestExceptionDetails;
+import academy.devdojo.springboot2essentials.exception.ExceptionsDetails;
 import academy.devdojo.springboot2essentials.exception.ValidationExceptionDetails;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +22,7 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Log4j2
-public class RestExceptionHandler {
+public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<BadRequestExceptionDetails> handlerBadRequestException(BadRequestException badRequestException)
     {
@@ -29,10 +34,8 @@ public class RestExceptionHandler {
                 .developerMessage(badRequestException.getClass().getName())
                 .build(),HttpStatus.BAD_REQUEST);
     }
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationExceptionDetails> handlerMethodArgumentNotValidException
-            (MethodArgumentNotValidException methodArgumentNotValidException) {
-
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException methodArgumentNotValidException, HttpHeaders headers, HttpStatus status, WebRequest request) {
         List<FieldError> fieldErrors = methodArgumentNotValidException.getBindingResult().getFieldErrors();
 
         String fields = fieldErrors.stream().map(FieldError::getField).collect(Collectors.joining(", "));
@@ -48,5 +51,20 @@ public class RestExceptionHandler {
                         .fields(fields)
                         .fieldsMenssage(fieldsMessage)
                         .build(), HttpStatus.BAD_REQUEST);
+    }
+
+
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+        ExceptionsDetails exceptionDetails = ExceptionsDetails.builder()
+                .timesTamp(LocalDateTime.now())
+                .status(status.value())
+                .title(ex.getCause().getMessage())
+                .details(ex.getMessage())
+                .developerMessage(ex.getClass().getName())
+                .build();
+
+        return new ResponseEntity<>(exceptionDetails, headers, status);
     }
 }
