@@ -9,6 +9,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import static org.hibernate.boot.model.process.spi.MetadataBuildingProcess.build;
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -19,9 +20,13 @@ public class SecurityConfig  {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((authz) -> authz
-                        .anyRequest().authenticated()
+                .csrf(csrf ->
+                        csrf.disable()
                 )
+//                .csrf((csrf) -> csrf
+//                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .authorizeHttpRequests((authz) -> authz
+                        .anyRequest().authenticated())
                 .httpBasic(withDefaults());
         return http.build();
     }
