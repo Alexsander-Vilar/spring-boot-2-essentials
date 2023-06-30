@@ -16,7 +16,16 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig  {
-
+    /**
+     * BasicAuthenticationFilter
+     * UsernamePasswordAuthenticationFilter
+     * DefaultLoginPageGeneratingFilter
+     * DefaultLogoutPageGeneratingFilter
+     * FilterSecurityInterceptor
+     * Authentication -> Authorization
+     * @param http
+     * @throws Exception
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -27,7 +36,8 @@ public class SecurityConfig  {
 //                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .authorizeHttpRequests((authz) -> authz
                         .anyRequest().authenticated())
-                .httpBasic(withDefaults());
+                .httpBasic(withDefaults())
+                .formLogin(withDefaults());
         return http.build();
     }
 
