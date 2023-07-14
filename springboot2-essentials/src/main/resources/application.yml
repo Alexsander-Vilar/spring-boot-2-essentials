@@ -10,10 +10,16 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
 
-    logging:
-      level:
-        org:
-          hibernate:
-            SQL: DEBUG
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, metrics, prometheus
